@@ -52,7 +52,7 @@
 
 // Define homing/hard limit switch input pins.
 #define LIMIT_PORT              GPIOB
-#define X_LIMIT_PIN             12
+#define X_LIMIT_PIN             16
 #define Y_LIMIT_PIN             13
 #define Z_LIMIT_PIN             14
 #define LIMIT_INMODE            GPIO_SHIFT12
