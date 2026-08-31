@@ -44,6 +44,8 @@
 /* Private variables ---------------------------------------------------------*/
 /* USER CODE BEGIN PV */
 __IO uint32_t cycle_count = 0;
+// uint32_t led_tick = 0;
+// volatile bool led_ready = false;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -189,6 +191,12 @@ void SysTick_Handler(void)
   HAL_IncTick();
   /* USER CODE BEGIN SysTick_IRQn 1 */
   Driver_IncTick();
+
+  // LED Blink PA6 every 500ms (only after GPIO is ready)
+  // if (led_ready && ++led_tick >= 500) {
+  //     led_tick = 0;
+  //     HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_6);
+  // }
   /* USER CODE END SysTick_IRQn 1 */
 }
 

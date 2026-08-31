@@ -462,6 +462,17 @@ static void MX_GPIO_Init(void)
 #ifdef GPIOH
   __HAL_RCC_GPIOH_CLK_ENABLE();
 #endif
+
+  /* Configure GPIO pin : PA6 for LED Blink */
+  // GPIO_InitTypeDef GPIO_InitStruct = {0};
+  // GPIO_InitStruct.Pin = GPIO_PIN_6;
+  // GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  // GPIO_InitStruct.Pull = GPIO_NOPULL;
+  // GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  // HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
+
+  // extern volatile bool led_ready;
+  // led_ready = true;
 }
 
 /**
