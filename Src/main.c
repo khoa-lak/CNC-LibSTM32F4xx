@@ -217,7 +217,7 @@ static void SystemClock_Config (void)
         .HSEState = RCC_HSE_ON,
         .PLL.PLLState = RCC_PLL_ON,
         .PLL.PLLSource = RCC_PLLSOURCE_HSE,
-  #if HSE_VALUE == 8000000
+  #if HSE_VALUE == 8000000 
         .PLL.PLLM = 7,
         .PLL.PLLN = 294,
         .PLL.PLLP = RCC_PLLP_DIV2,

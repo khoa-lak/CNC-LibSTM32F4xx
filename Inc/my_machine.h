@@ -46,7 +46,7 @@
 //#define BOARD_PROTONEER_3XX       // For use with Nucleo-F411RE and F446RE boards.
 //#define BOARD_STM32F401_UNI       // F401 CNC board
 //#define BOARD_STM32F407VET6_DEV   // F407 based industrial control board
-//#define BOARD_MY_MACHINE          // Add my_machine_map.h before enabling this!
+#define BOARD_MY_MACHINE            // Custom machine map (boards/my_machine_map.h)
 
 // WARNING: BOARD_BTT_SKR_20 may fry your Trinamic drivers due to bad hardware design.
 //          The risk goes away if Q1 (HY1904C2) is shorted between source (S) and drain (D).
