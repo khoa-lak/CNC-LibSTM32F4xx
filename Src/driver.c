@@ -3085,6 +3085,7 @@ bool driver_init (void)
     board_init();
 #endif
 
+
 #if ETHERNET_ENABLE
     enet_init();
 #endif

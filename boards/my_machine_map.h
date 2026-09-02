@@ -176,4 +176,18 @@
 #define MOTOR_FAULT_PIN         AUXINPUT0_PIN
 #endif
 
+// =============================================================================
+// 8. CÁC CHÂN ĐIỀU KHIỂN KHÍ NÉN CHO THAY DAO TỰ ĐỘNG (ATC PNEUMATICS)
+// =============================================================================
+#ifndef ATC_ENABLE
+#define ATC_ENABLE              1       // 1: Kích hoạt module thay dao tự động ATC
+#endif
+
+#define ATC_UNCLAMP_PORT        GPIOB   // Van khí nén nhả dao (1: Mở ngàm, 0: Kẹp)
+#define ATC_UNCLAMP_PIN         10
+
+#define ATC_AIR_BLAST_PORT      GPIOB   // Van khí thổi sạch côn dao Spindle
+#define ATC_AIR_BLAST_PIN       11
+
 #endif // _MY_MACHINE_MAP_H_
+
