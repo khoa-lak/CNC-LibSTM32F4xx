@@ -5,13 +5,14 @@
   Tác giả: CNC Controller Team
   Baudrate: 115200 bps
   =============================================================================
-  SƠ ĐỒ CHÂN (Bám sát theo boards/my_machine_map.h):
-  - ĐỘNG CƠ BƯỚC:
-    + Trục X: Step PD11, Dir PE4
-    + Trục Y: Step PD12, Dir PE5
-    + Trục Z: Step PD13, Dir PE6
-    + Trục A: Step PD14, Dir PE0
-    + Enable chung: PD4 (Mức LOW kích hoạt driver)
+  SƠ ĐỒ CHÂN (CẤU HÌNH TRỰC TIẾP TRONG FILE NÀY):
+  - ĐỘNG CƠ BƯỚC (MỖI DRIVER CÓ CHÂN ENABLE RIÊNG BIỆT):
+    + Trục X: Step PD11, Dir PE4, Enable PD4
+    + Trục Y: Step PD12, Dir PE5, Enable PD5
+    + Trục Z: Step PD13, Dir PE6, Enable PD6
+    + Trục A: Step PD14, Dir PE0, Enable PD7
+    * Chú ý: Bạn có thể tự do thay đổi các chân PIN_ENABLE_X/Y/Z/A bên dưới cho khớp mạch thực tế.
+    * Mức kích hoạt: LOW kích hoạt driver (Active LOW đối với TB6600, DM542, A4988...)
   - CÔNG TẮC HÀNH TRÌNH (LIMIT SWITCHES):
     + X Limit: PA4 (Input Pull-up)
     + Y Limit: PA5 (Input Pull-up)
@@ -41,34 +42,44 @@
 // 1. ĐỊNH NGHĨA CHÂN PHẦN CỨNG (GPIO PIN DEFINITIONS)
 // =============================================================================
 
-// --- Động cơ bước ---
-#define PIN_STEP_X          PD11
-#define PIN_DIR_X           PE4
-#define PIN_STEP_Y          PD12
-#define PIN_DIR_Y           PE5
-#define PIN_STEP_Z          PD13
-#define PIN_DIR_Z           PE6
-#define PIN_STEP_A          PD14
-#define PIN_DIR_A           PE0
-#define PIN_STEPPERS_ENABLE PD4   // Active LOW cho hầu hết driver (TB6600, DM542, A4988)
+// --- Động cơ bước (Step / Dir / Enable riêng từng trục) ---
+#define PIN_STEP_X            PE5
+#define PIN_DIR_X             PE3
+#define PIN_ENABLE_X          PC13  // Chân Enable riêng cho Driver trục X
+
+#define PIN_STEP_Y            PE4
+#define PIN_DIR_Y             PE2
+#define PIN_ENABLE_Y          PE6   // Chân Enable riêng cho Driver trục Y
+
+#define PIN_STEP_Z            PC1
+#define PIN_DIR_Z             PC0
+#define PIN_ENABLE_Z          PC2   // Chân Enable riêng cho Driver trục Z
+
+#define PIN_STEP_A            PD14
+#define PIN_DIR_A             PE0
+#define PIN_ENABLE_A          PD7   // Chân Enable riêng cho Driver trục A (Trục 4)
+
+// Mức kích hoạt Driver (LOW = Enable giữ lực, HIGH = Disable thả trôi)
+#define DRIVER_ENABLE_ACTIVE  LOW
+#define DRIVER_DISABLE_ACTIVE HIGH
 
 // --- Công tắc hành trình ---
-#define PIN_LIMIT_X         PA4
-#define PIN_LIMIT_Y         PA5
-#define PIN_LIMIT_Z         PA6
+#define PIN_LIMIT_X           PA4
+#define PIN_LIMIT_Y           PA5
+#define PIN_LIMIT_Z           PA6
 
 // --- Trục chính (Spindle) ---
-#define PIN_SPINDLE_PWM     PB0
-#define PIN_SPINDLE_DIR     PC6
-#define PIN_SPINDLE_ENABLE  PC7
+#define PIN_SPINDLE_PWM       PB0
+#define PIN_SPINDLE_DIR       PC6
+#define PIN_SPINDLE_ENABLE    PC7
 
 // --- Nước tưới nguội & Khí làm mát ---
-#define PIN_COOLANT_FLOOD   PD8
-#define PIN_COOLANT_MIST    PD9
+#define PIN_COOLANT_FLOOD     PD8
+#define PIN_COOLANT_MIST      PD9
 
 // --- Khí nén thay dao tự động ATC ---
-#define PIN_ATC_UNCLAMP     PB10
-#define PIN_ATC_AIR_BLAST   PB11
+#define PIN_ATC_UNCLAMP       PB10
+#define PIN_ATC_AIR_BLAST     PB11
 
 // --- Cảm biến & Nút bấm ---
 #define PIN_INPUT_ESTOP       PC0
@@ -79,17 +90,21 @@
 
 // --- LED báo trạng thái bo mạch ---
 #if defined(LED_BUILTIN)
-  #define PIN_STATUS_LED    LED_BUILTIN
+  #define PIN_STATUS_LED      LED_BUILTIN
 #elif defined(PA6)
-  #define PIN_STATUS_LED    PA6
+  #define PIN_STATUS_LED      PA6
 #else
-  #define PIN_STATUS_LED    PC13
+  #define PIN_STATUS_LED      PC13
 #endif
 
 // =============================================================================
 // 2. BIẾN TOÀN CỤC & TRẠNG THÁI HỆ THỐNG
 // =============================================================================
-bool steppers_enabled = true;
+bool enable_x_state   = true;  // Trạng thái Enable trục X
+bool enable_y_state   = true;  // Trạng thái Enable trục Y
+bool enable_z_state   = true;  // Trạng thái Enable trục Z
+bool enable_a_state   = true;  // Trạng thái Enable trục A
+
 bool spindle_running  = false;
 bool spindle_dir_ccw  = false;
 uint8_t spindle_speed = 0; // 0 - 255
@@ -99,8 +114,8 @@ bool atc_unclamp_on   = false;
 bool atc_air_blast_on = false;
 
 // Cấu hình Jogging
-uint16_t jog_steps    = 400;   // Số bước mỗi lần Jog (mặc định ~2 vòng với 200 step/rev microstepping 1/2)
-uint16_t jog_delay_us = 400;   // Chu kỳ xung (us) -> tốc độ phát xung
+uint16_t jog_steps    = 400;   // Số bước mỗi lần Jog
+uint16_t jog_delay_us = 400;   // Chu kỳ xung (us)
 
 // =============================================================================
 // 3. NGUYÊN MẪU HÀM (FUNCTION PROTOTYPES)
@@ -108,6 +123,10 @@ uint16_t jog_delay_us = 400;   // Chu kỳ xung (us) -> tốc độ phát xung
 void print_header();
 void print_main_menu();
 void handle_main_menu(char cmd);
+
+void set_axis_enable(char axis, bool enable);
+void set_all_axes_enable(bool enable);
+void print_steppers_status();
 
 void menu_steppers();
 void step_single_axis(uint32_t stepPin, uint32_t dirPin, bool dir, uint32_t steps, uint16_t delayUs);
@@ -141,15 +160,21 @@ void setup() {
   // --- Cấu hình các chân OUTPUT cho Động cơ bước ---
   pinMode(PIN_STEP_X, OUTPUT);
   pinMode(PIN_DIR_X, OUTPUT);
+  pinMode(PIN_ENABLE_X, OUTPUT);
+
   pinMode(PIN_STEP_Y, OUTPUT);
   pinMode(PIN_DIR_Y, OUTPUT);
+  pinMode(PIN_ENABLE_Y, OUTPUT);
+
   pinMode(PIN_STEP_Z, OUTPUT);
   pinMode(PIN_DIR_Z, OUTPUT);
+  pinMode(PIN_ENABLE_Z, OUTPUT);
+
   pinMode(PIN_STEP_A, OUTPUT);
   pinMode(PIN_DIR_A, OUTPUT);
-  pinMode(PIN_STEPPERS_ENABLE, OUTPUT);
+  pinMode(PIN_ENABLE_A, OUTPUT);
 
-  // Mặc định: Giữ chân STEP ở mức LOW, Enable = LOW (Kích hoạt driver)
+  // Mặc định: Giữ chân STEP ở mức LOW, kích hoạt toàn bộ 4 driver
   digitalWrite(PIN_STEP_X, LOW);
   digitalWrite(PIN_STEP_Y, LOW);
   digitalWrite(PIN_STEP_Z, LOW);
@@ -158,7 +183,8 @@ void setup() {
   digitalWrite(PIN_DIR_Y, LOW);
   digitalWrite(PIN_DIR_Z, LOW);
   digitalWrite(PIN_DIR_A, LOW);
-  digitalWrite(PIN_STEPPERS_ENABLE, LOW); // LOW = Enable
+  
+  set_all_axes_enable(true); // Kích hoạt toàn bộ 4 driver
 
   // --- Cấu hình các chân OUTPUT cho Spindle ---
   pinMode(PIN_SPINDLE_PWM, OUTPUT);
@@ -200,7 +226,52 @@ void setup() {
 }
 
 // =============================================================================
-// 5. VÒNG LẶP CHÍNH (LOOP)
+// 5. ĐIỀU KHIỂN CHÂN ENABLE TỪNG TRỤC RIÊNG BIỆT
+// =============================================================================
+void set_axis_enable(char axis, bool enable) {
+  uint8_t level = enable ? DRIVER_ENABLE_ACTIVE : DRIVER_DISABLE_ACTIVE;
+  switch (axis) {
+    case 'X':
+    case 'x':
+      enable_x_state = enable;
+      digitalWrite(PIN_ENABLE_X, level);
+      break;
+    case 'Y':
+    case 'y':
+      enable_y_state = enable;
+      digitalWrite(PIN_ENABLE_Y, level);
+      break;
+    case 'Z':
+    case 'z':
+      enable_z_state = enable;
+      digitalWrite(PIN_ENABLE_Z, level);
+      break;
+    case 'A':
+    case 'a':
+      enable_a_state = enable;
+      digitalWrite(PIN_ENABLE_A, level);
+      break;
+  }
+}
+
+void set_all_axes_enable(bool enable) {
+  set_axis_enable('X', enable);
+  set_axis_enable('Y', enable);
+  set_axis_enable('Z', enable);
+  set_axis_enable('A', enable);
+}
+
+void print_steppers_status() {
+  Serial.print(F("[Trang thai Enable Driver -> "));
+  Serial.print(F("X: ")); Serial.print(enable_x_state ? F("ON ") : F("OFF"));
+  Serial.print(F(" | Y: ")); Serial.print(enable_y_state ? F("ON ") : F("OFF"));
+  Serial.print(F(" | Z: ")); Serial.print(enable_z_state ? F("ON ") : F("OFF"));
+  Serial.print(F(" | A: ")); Serial.print(enable_a_state ? F("ON ") : F("OFF"));
+  Serial.println(F("]"));
+}
+
+// =============================================================================
+// 6. VÒNG LẶP CHÍNH (LOOP)
 // =============================================================================
 void loop() {
   if (Serial.available() > 0) {
@@ -219,18 +290,18 @@ void loop() {
 }
 
 // =============================================================================
-// 6. GIAO DIỆN MENU CHÍNH (SERIAL CLI)
+// 7. GIAO DIỆN MENU CHÍNH (SERIAL CLI)
 // =============================================================================
 void print_header() {
   Serial.println(F("\r\n============================================================"));
   Serial.println(F("     CNC MACHINE MECHANISM TEST SUITE - STM32F407VET6       "));
-  Serial.println(F("        Bo mach: STM32F407VET6 Custom CNC (grblHAL)         "));
+  Serial.println(F("   Bo mach: STM32F407VET6 Custom CNC (Tung Driver Enable Rieng)"));
   Serial.println(F("============================================================"));
 }
 
 void print_main_menu() {
   Serial.println(F("\r\n--- MENU CHUC NANG KIEM TRA ---"));
-  Serial.println(F(" [1] Test Dong co buoc (Steppers X, Y, Z, A & Enable)"));
+  Serial.println(F(" [1] Test Dong co buoc (Steppers X, Y, Z, A & Enable rieng tung truc)"));
   Serial.println(F(" [2] Che do Jogging ban phim (Thu cong W/A/S/D/Q/E/Z/C)"));
   Serial.println(F(" [3] Test Truc chinh Spindle (Enable, Chieu DIR, PWM 0-100%)"));
   Serial.println(F(" [4] Test Tuoi nguoi & Lam mat (Coolant Flood & Mist)"));
@@ -286,7 +357,7 @@ void handle_main_menu(char cmd) {
 }
 
 // =============================================================================
-// 7. MODULE 1: KIỂM TRA ĐỘNG CƠ BƯỚC (STEPPER MOTORS)
+// 8. MODULE 1: KIỂM TRA ĐỘNG CƠ BƯỚC & ENABLE RIÊNG (STEPPER MOTORS)
 // =============================================================================
 void step_single_axis(uint32_t stepPin, uint32_t dirPin, bool dir, uint32_t steps, uint16_t delayUs) {
   digitalWrite(dirPin, dir ? HIGH : LOW);
@@ -302,18 +373,26 @@ void step_single_axis(uint32_t stepPin, uint32_t dirPin, bool dir, uint32_t step
 
 void menu_steppers() {
   Serial.println(F("\r\n============================================================"));
-  Serial.println(F("                 KIEM TRA DONG CO BUOC (STEPPERS)           "));
+  Serial.println(F("         KIEM TRA DONG CO BUOC & ENABLE RIENG TUNG TRUC     "));
   Serial.println(F("============================================================"));
-  Serial.println(F(" [E] Bat/Tat Steppers Enable (PD4)"));
-  Serial.println(F(" [X] Test Truc X (PD11 Step, PE4 Dir) - Quay 800 buoc Thuan/Nghich"));
-  Serial.println(F(" [Y] Test Truc Y (PD12 Step, PE5 Dir) - Quay 800 buoc Thuan/Nghich"));
-  Serial.println(F(" [Z] Test Truc Z (PD13 Step, PE6 Dir) - Quay 800 buoc Len/Xuong"));
-  Serial.println(F(" [A] Test Truc A (PD14 Step, PE0 Dir) - Quay 800 buoc Thuan/Nghich"));
-  Serial.println(F(" [S] Test Quet Tan So Xung (Tang toc tu 1kHz -> 5kHz tren truc X)"));
-  Serial.println(F(" [0] Quay lai Menu chinh"));
+  Serial.println(F(" DIEU KHIEN ENABLE RIENG TUNG DRIVER:"));
+  Serial.println(F("   [1] Bat/Tat Enable Trục X (PIN_ENABLE_X)"));
+  Serial.println(F("   [2] Bat/Tat Enable Trục Y (PIN_ENABLE_Y)"));
+  Serial.println(F("   [3] Bat/Tat Enable Trục Z (PIN_ENABLE_Z)"));
+  Serial.println(F("   [4] Bat/Tat Enable Trục A (PIN_ENABLE_A)"));
+  Serial.println(F("   [E] Bat/Tat Enable TAT CA cac truc cung luc"));
+  Serial.println(F(" TEST CHAY PHAT XUNG TUNG TRUC:"));
+  Serial.println(F("   [X] Test Truc X - Quay 800 buoc Thuan/Nghich"));
+  Serial.println(F("   [Y] Test Truc Y - Quay 800 buoc Thuan/Nghich"));
+  Serial.println(F("   [Z] Test Truc Z - Quay 800 buoc Len/Xuong"));
+  Serial.println(F("   [A] Test Truc A - Quay 800 buoc Thuan/Nghich"));
+  Serial.println(F("   [S] Test Quet Tan So Xung (Tang toc tu 1kHz -> 5kHz tren truc X)"));
+  Serial.println(F("   [0] Quay lai Menu chinh"));
   
   while (true) {
-    Serial.print(F("\r\n[Steppers] Nhap lenh (E/X/Y/Z/A/S/0): "));
+    Serial.println();
+    print_steppers_status();
+    Serial.print(F("[Steppers] Nhap lenh (1..4/E/X/Y/Z/A/S/0): "));
     char c = read_char_blocking();
 
     if (c == '0' || c == 'q' || c == 'Q') {
@@ -322,16 +401,43 @@ void menu_steppers() {
     }
 
     switch (c) {
+      case '1':
+        set_axis_enable('X', !enable_x_state);
+        Serial.print(F("-> Enable Driver X: "));
+        Serial.println(enable_x_state ? F("ENABLED (Giu luc)") : F("DISABLED (Tha tu do)"));
+        break;
+
+      case '2':
+        set_axis_enable('Y', !enable_y_state);
+        Serial.print(F("-> Enable Driver Y: "));
+        Serial.println(enable_y_state ? F("ENABLED (Giu luc)") : F("DISABLED (Tha tu do)"));
+        break;
+
+      case '3':
+        set_axis_enable('Z', !enable_z_state);
+        Serial.print(F("-> Enable Driver Z: "));
+        Serial.println(enable_z_state ? F("ENABLED (Giu luc)") : F("DISABLED (Tha tu do)"));
+        break;
+
+      case '4':
+        set_axis_enable('A', !enable_a_state);
+        Serial.print(F("-> Enable Driver A: "));
+        Serial.println(enable_a_state ? F("ENABLED (Giu luc)") : F("DISABLED (Tha tu do)"));
+        break;
+
       case 'e':
       case 'E':
-        steppers_enabled = !steppers_enabled;
-        digitalWrite(PIN_STEPPERS_ENABLE, steppers_enabled ? LOW : HIGH);
-        Serial.print(F("-> Trang thai Stepper Enable (PD4): "));
-        Serial.println(steppers_enabled ? F("ENABLED (LOW - Driver giu luc)") : F("DISABLED (HIGH - Tha tu do)"));
+        {
+          bool new_state = !(enable_x_state && enable_y_state && enable_z_state && enable_a_state);
+          set_all_axes_enable(new_state);
+          Serial.print(F("-> Da chuyen tat ca Driver Enable thanh: "));
+          Serial.println(new_state ? F("ENABLED (Giu luc)") : F("DISABLED (Tha tu do)"));
+        }
         break;
 
       case 'x':
       case 'X':
+        set_axis_enable('X', true);
         Serial.println(F("-> Dang test Truc X: Quay THUAN (800 steps)..."));
         step_single_axis(PIN_STEP_X, PIN_DIR_X, HIGH, 800, 500);
         delay(300);
@@ -342,6 +448,7 @@ void menu_steppers() {
 
       case 'y':
       case 'Y':
+        set_axis_enable('Y', true);
         Serial.println(F("-> Dang test Truc Y: Quay THUAN (800 steps)..."));
         step_single_axis(PIN_STEP_Y, PIN_DIR_Y, HIGH, 800, 500);
         delay(300);
@@ -352,6 +459,7 @@ void menu_steppers() {
 
       case 'z':
       case 'Z':
+        set_axis_enable('Z', true);
         Serial.println(F("-> Dang test Truc Z: Di chuyen LEN (800 steps)..."));
         step_single_axis(PIN_STEP_Z, PIN_DIR_Z, HIGH, 800, 500);
         delay(300);
@@ -362,6 +470,7 @@ void menu_steppers() {
 
       case 'a':
       case 'A':
+        set_axis_enable('A', true);
         Serial.println(F("-> Dang test Truc A: Quay THUAN (800 steps)..."));
         step_single_axis(PIN_STEP_A, PIN_DIR_A, HIGH, 800, 500);
         delay(300);
@@ -372,6 +481,7 @@ void menu_steppers() {
 
       case 's':
       case 'S':
+        set_axis_enable('X', true);
         Serial.println(F("-> Dang test Quet Tan So Xung tren Truc X (Ramp up delay 1000us -> 200us)..."));
         digitalWrite(PIN_DIR_X, HIGH);
         for (uint16_t d = 1000; d >= 200; d -= 20) {
@@ -393,7 +503,7 @@ void menu_steppers() {
 }
 
 // =============================================================================
-// 8. MODULE 2: CHẾ ĐỘ JOGGING THỦ CÔNG (KEYBOARD JOGGING)
+// 9. MODULE 2: CHẾ ĐỘ JOGGING THỦ CÔNG (KEYBOARD JOGGING)
 // =============================================================================
 void menu_jogging() {
   Serial.println(F("\r\n============================================================"));
@@ -414,9 +524,8 @@ void menu_jogging() {
   Serial.print(jog_delay_us);
   Serial.println(F(" us"));
 
-  // Đảm bảo Enable Stepper
-  digitalWrite(PIN_STEPPERS_ENABLE, LOW);
-  steppers_enabled = true;
+  // Đảm bảo kích hoạt Enable cho toàn bộ các driver
+  set_all_axes_enable(true);
 
   while (true) {
     char c = read_char_blocking();
@@ -510,7 +619,7 @@ void menu_jogging() {
 }
 
 // =============================================================================
-// 9. MODULE 3: KIỂM TRA TRỤC CHÍNH (SPINDLE)
+// 10. MODULE 3: KIỂM TRA TRỤC CHÍNH (SPINDLE)
 // =============================================================================
 void set_spindle(bool enable, bool dir_ccw, uint8_t pwm_val) {
   spindle_running = enable;
@@ -617,7 +726,7 @@ void menu_spindle() {
 }
 
 // =============================================================================
-// 10. MODULE 4: KIỂM TRA TƯỚI NGUỘI & KHÍ LÀM MÁT (COOLANT & MIST)
+// 11. MODULE 4: KIỂM TRA TƯỚI NGUỘI & KHÍ LÀM MÁT (COOLANT & MIST)
 // =============================================================================
 void menu_coolant() {
   Serial.println(F("\r\n============================================================"));
@@ -699,7 +808,7 @@ void menu_coolant() {
 }
 
 // =============================================================================
-// 11. MODULE 5: KIỂM TRA KHÍ NÉN THAY DAO TỰ ĐỘNG (ATC PNEUMATICS)
+// 12. MODULE 5: KIỂM TRA KHÍ NÉN THAY DAO TỰ ĐỘNG (ATC PNEUMATICS)
 // =============================================================================
 void test_atc_full_cycle() {
   Serial.println(F("\r\n--- MOPHONG CHU TRINH THAY DAO TU DONG ATC ---"));
@@ -779,7 +888,7 @@ void menu_atc() {
 }
 
 // =============================================================================
-// 12. MODULE 6: THEO DÕI CẢM BIẾN & CÔNG TẮC HÀNH TRÌNH (LIVE SENSOR MONITOR)
+// 13. MODULE 6: THEO DÕI CẢM BIẾN & CÔNG TẮC HÀNH TRÌNH (LIVE SENSOR MONITOR)
 // =============================================================================
 void monitor_sensors_live() {
   Serial.println(F("\r\n============================================================"));
@@ -877,7 +986,7 @@ void monitor_sensors_live() {
 }
 
 // =============================================================================
-// 13. MODULE 7: TỰ ĐỘNG KIỂM TRA TOÀN DIỆN (AUTO SELF-TEST SEQUENCE)
+// 14. MODULE 7: TỰ ĐỘNG KIỂM TRA TOÀN DIỆN (AUTO SELF-TEST SEQUENCE)
 // =============================================================================
 void run_auto_self_test() {
   Serial.println(F("\r\n============================================================"));
@@ -893,10 +1002,10 @@ void run_auto_self_test() {
     return;
   }
 
-  Serial.println(F("\r\n[1/6] Kiem tra Steppers Enable (PD4)..."));
-  digitalWrite(PIN_STEPPERS_ENABLE, LOW); // LOW = Enable
+  Serial.println(F("\r\n[1/6] Kiem tra tung chan Driver Enable (X, Y, Z, A)..."));
+  set_all_axes_enable(true);
   delay(300);
-  Serial.println(F("   -> PASS: Enable da kich hoat."));
+  Serial.println(F("   -> PASS: Enable 4 truc da duoc kich hoat."));
 
   Serial.println(F("[2/6] Kiem tra phat xung 4 truc dong co buoc (X, Y, Z, A)..."));
   Serial.print(F("   -> Test Truc X... "));
@@ -962,7 +1071,7 @@ void run_auto_self_test() {
 }
 
 // =============================================================================
-// 14. TIỆN ÍCH TRUYỀN THÔNG SERIAL (UTILITIES)
+// 15. TIỆN ÍCH TRUYỀN THÔNG SERIAL (UTILITIES)
 // =============================================================================
 char read_char_blocking() {
   flush_serial_input();
