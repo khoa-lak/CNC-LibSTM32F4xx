@@ -134,7 +134,7 @@
 #define AUXINPUT0_PORT          GPIOB
 #define AUXINPUT0_PIN           8
 
-// AUXINPUT1: Cảm biến dò dao Probe (dự phòng)
+// AUXINPUT1: Cảm biến dò dao Probe
 #define AUXINPUT1_PORT          GPIOA
 #define AUXINPUT1_PIN           7
 
@@ -149,6 +149,18 @@
 // AUXINPUT4: Nút tiếp tục gia công (Cycle Start)
 #define AUXINPUT4_PORT          GPIOB
 #define AUXINPUT4_PIN           1
+
+// AUXINPUT5: Cảm biến đo dao tự động cố định (Toolsetter)
+#define AUXINPUT5_PORT          GPIOB
+#define AUXINPUT5_PIN           12
+
+// AUXINPUT6: Cảm biến báo lỗi Driver động cơ (Motor Fault)
+#define AUXINPUT6_PORT          GPIOB
+#define AUXINPUT6_PIN           13
+
+// AUXINPUT7: Công tắc mở khóa giới hạn hành trình (Limits Override)
+#define AUXINPUT7_PORT          GPIOB
+#define AUXINPUT7_PIN           14
 
 #if CONTROL_ENABLE & CONTROL_HALT
 #define RESET_PORT              AUXINPUT2_PORT
@@ -168,12 +180,24 @@
 #define PROBE_PIN               AUXINPUT1_PIN
 #endif
 
+#if TOOLSETTER_ENABLE
+#define TOOLSETTER_PORT         AUXINPUT5_PORT
+#define TOOLSETTER_PIN          AUXINPUT5_PIN
+#endif
+
 #if SAFETY_DOOR_ENABLE
 #define SAFETY_DOOR_PORT        AUXINPUT0_PORT
 #define SAFETY_DOOR_PIN         AUXINPUT0_PIN
-#elif MOTOR_FAULT_ENABLE
-#define MOTOR_FAULT_PORT        AUXINPUT0_PORT
-#define MOTOR_FAULT_PIN         AUXINPUT0_PIN
+#endif
+
+#if MOTOR_FAULT_ENABLE
+#define MOTOR_FAULT_PORT        AUXINPUT6_PORT
+#define MOTOR_FAULT_PIN         AUXINPUT6_PIN
+#endif
+
+#if LIMITS_OVERRIDE_ENABLE
+#define LIMITS_OVERRIDE_PORT    AUXINPUT7_PORT
+#define LIMITS_OVERRIDE_PIN     AUXINPUT7_PIN
 #endif
 
 // =============================================================================

@@ -140,17 +140,17 @@
 // Optional control signals:
 // These will be assigned to aux input pins. Use the $pins command to check which pins are assigned.
 // NOTE: If not enough pins are available assignment will silently fail.
-//#define PROBE_ENABLE            0 // Default enabled, uncomment to disable probe input or uncomment and set to 2 to enable relay switched probes.
-//#define PROBE2_ENABLE           1 // Enable second regular probe input, depending on the board the input assigned may be predefined.
-//#define TOOLSETTER_ENABLE       1 // Enable toolsetter input, depending on the board the input assigned may be predefined.
-//#define SAFETY_DOOR_ENABLE      1
-//#define MOTOR_FAULT_ENABLE      1
-//#define MOTOR_WARNING_ENABLE    1
+#define PROBE_ENABLE            1 // Default enabled, set to 1 for standard probe, 2 for relay switched probes.
+//#define PROBE2_ENABLE           1 // Enable second regular probe input
+#define TOOLSETTER_ENABLE       1 // Enable toolsetter input (đo dao tự động M6/T)
+#define SAFETY_DOOR_ENABLE      1 // Cảm biến cửa an toàn (tạm dừng khi mở cửa)
+#define MOTOR_FAULT_ENABLE      1 // Cảm biến báo lỗi driver động cơ
+#define MOTOR_WARNING_ENABLE    1 // Cảnh báo sớm driver động cơ
 //#define PROBE_DISCONNECT_ENABLE 1
 //#define STOP_DISABLE_ENABLE     1
 //#define BLOCK_DELETE_ENABLE     1
 //#define SINGLE_BLOCK_ENABLE     1
-//#define LIMITS_OVERRIDE_ENABLE  1
+#define LIMITS_OVERRIDE_ENABLE  1 // Công tắc mở khóa đè khi chạm limit switch
 
 /**/
 // If the selected board map supports more than three motors ganging and/or auto-squaring
