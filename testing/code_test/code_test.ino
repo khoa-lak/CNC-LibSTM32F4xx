@@ -28,8 +28,8 @@
     + ATC Air Blast (Van thổi khí côn Spindle): PB11
   - CẢM BIẾN & NÚT NHẤN ĐIỀU KHIỂN (INPUTS):
     + Nút dừng khẩn cấp (E-Stop/Reset): PE11
-    + Nút tạm dừng (Feed Hold): PB7
-    + Nút bắt đầu (Cycle Start): PB1
+    + Nút tạm dừng (Feed Hold): PB4
+    + Nút bắt đầu (Cycle Start): PB3
     + Cảm biến cửa (Safety Door): PB8
     + Cảm biến dò dao (Probe): PA7
   =============================================================================
@@ -86,8 +86,8 @@
 
 // --- Cảm biến & Nút bấm ---
 #define PIN_INPUT_ESTOP PE11
-#define PIN_INPUT_FEED_HOLD PB7
-#define PIN_INPUT_CYCLE_START PB1
+#define PIN_INPUT_FEED_HOLD PB4
+#define PIN_INPUT_CYCLE_START PB3
 #define PIN_INPUT_SAFETY_DOOR PB8
 #define PIN_INPUT_PROBE PA7
 

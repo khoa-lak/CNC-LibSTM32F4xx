@@ -12,22 +12,22 @@
             "type": "platformio-debug",
             "request": "launch",
             "name": "PIO Debug",
-            "executable": "C:/Users/KhoaAnh/OneDrive/Desktop/GitHub/CNC-Machine/CNC-LibSTM32F4xx/.pio/build/blackpill_f401cc_uni/firmware.elf",
-            "projectEnvName": "blackpill_f401cc_uni",
+            "executable": "C:/Users/KhoaAnh/OneDrive/Desktop/GitHub/CNC-Machine/CNC-LibSTM32F4xx/.pio/build/stm32f407vet6_custom/firmware.elf",
+            "projectEnvName": "stm32f407vet6_custom",
             "toolchainBinDir": "C:/Users/KhoaAnh/.platformio/packages/toolchain-gccarmnoneeabi@1.70201.0/bin",
             "internalConsoleOptions": "openOnSessionStart",
             "svdPath": "C:/Users/KhoaAnh/.platformio/platforms/ststm32/misc/svd/STM32F40x.svd",
             "preLaunchTask": {
                 "type": "PlatformIO",
-                "task": "Pre-Debug (blackpill_f401cc_uni)"
+                "task": "Pre-Debug (stm32f407vet6_custom)"
             }
         },
         {
             "type": "platformio-debug",
             "request": "launch",
             "name": "PIO Debug (skip Pre-Debug)",
-            "executable": "C:/Users/KhoaAnh/OneDrive/Desktop/GitHub/CNC-Machine/CNC-LibSTM32F4xx/.pio/build/blackpill_f401cc_uni/firmware.elf",
-            "projectEnvName": "blackpill_f401cc_uni",
+            "executable": "C:/Users/KhoaAnh/OneDrive/Desktop/GitHub/CNC-Machine/CNC-LibSTM32F4xx/.pio/build/stm32f407vet6_custom/firmware.elf",
+            "projectEnvName": "stm32f407vet6_custom",
             "toolchainBinDir": "C:/Users/KhoaAnh/.platformio/packages/toolchain-gccarmnoneeabi@1.70201.0/bin",
             "internalConsoleOptions": "openOnSessionStart",
             "svdPath": "C:/Users/KhoaAnh/.platformio/platforms/ststm32/misc/svd/STM32F40x.svd"
@@ -36,8 +36,8 @@
             "type": "platformio-debug",
             "request": "launch",
             "name": "PIO Debug (without uploading)",
-            "executable": "C:/Users/KhoaAnh/OneDrive/Desktop/GitHub/CNC-Machine/CNC-LibSTM32F4xx/.pio/build/blackpill_f401cc_uni/firmware.elf",
-            "projectEnvName": "blackpill_f401cc_uni",
+            "executable": "C:/Users/KhoaAnh/OneDrive/Desktop/GitHub/CNC-Machine/CNC-LibSTM32F4xx/.pio/build/stm32f407vet6_custom/firmware.elf",
+            "projectEnvName": "stm32f407vet6_custom",
             "toolchainBinDir": "C:/Users/KhoaAnh/.platformio/packages/toolchain-gccarmnoneeabi@1.70201.0/bin",
             "internalConsoleOptions": "openOnSessionStart",
             "svdPath": "C:/Users/KhoaAnh/.platformio/platforms/ststm32/misc/svd/STM32F40x.svd",

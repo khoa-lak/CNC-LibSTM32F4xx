@@ -148,11 +148,11 @@
 
 // AUXINPUT3: Nút tạm dừng gia công (Feed Hold)
 #define AUXINPUT3_PORT          GPIOB
-#define AUXINPUT3_PIN           7
+#define AUXINPUT3_PIN           4
 
 // AUXINPUT4: Nút tiếp tục gia công (Cycle Start)
 #define AUXINPUT4_PORT          GPIOB
-#define AUXINPUT4_PIN           1
+#define AUXINPUT4_PIN           3
 
 // AUXINPUT5: Cảm biến đo dao tự động cố định (Toolsetter)
 #define AUXINPUT5_PORT          GPIOB
