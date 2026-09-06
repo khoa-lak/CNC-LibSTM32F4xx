@@ -7,8 +7,8 @@
   =============================================================================
   SƠ ĐỒ CHÂN (CẤU HÌNH TRỰC TIẾP TRONG FILE NÀY):
   - ĐỘNG CƠ BƯỚC (MỖI DRIVER CÓ CHÂN ENABLE RIÊNG BIỆT):
-    + Trục X: Step PE5, Dir PE3, Enable PC13
-    + Trục Y: Step PE4, Dir PE2, Enable PE6
+    + Trục X: Step PE4, Dir PE2, Enable PE6
+    + Trục Y: Step PE5, Dir PE3, Enable PC13
     + Trục Z: Step PC1, Dir PC0, Enable PC2
     + Trục A: Step PD14, Dir PE0, Enable PD7
     * Mức kích hoạt Driver: LOW kích hoạt (Active LOW đối với TB6600, DM542, A4988...)
@@ -43,13 +43,13 @@
 // =============================================================================
 
 // --- Động cơ bước (Step / Dir / Enable riêng từng trục) ---
-#define PIN_STEP_Y PE5
-#define PIN_DIR_Y PE3
-#define PIN_ENABLE_Y PC13  // Chân Enable riêng cho Driver trục X
-
 #define PIN_STEP_X PE4
 #define PIN_DIR_X PE2
-#define PIN_ENABLE_X PE6   // Chân Enable riêng cho Driver trục Y
+#define PIN_ENABLE_X PE6   // Chân Enable riêng cho Driver trục X
+
+#define PIN_STEP_Y PE5
+#define PIN_DIR_Y PE3
+#define PIN_ENABLE_Y PC13  // Chân Enable riêng cho Driver trục Y
 
 #define PIN_STEP_Z PC1
 #define PIN_DIR_Z PC0

@@ -37,22 +37,28 @@
 // 3. CÁC CHÂN ĐIỀU KHIỂN ĐỘNG CƠ BƯỚC (STEP / DIRECTION / ENABLE)
 // =============================================================================
 // --- Trục X ---
-#define X_STEP_PORT             GPIOD
-#define X_STEP_PIN              11
+#define X_STEP_PORT             GPIOE
+#define X_STEP_PIN              4
 #define X_DIRECTION_PORT        GPIOE
-#define X_DIRECTION_PIN         4
+#define X_DIRECTION_PIN         2
+#define X_ENABLE_PORT           GPIOE
+#define X_ENABLE_PIN            6
 
 // --- Trục Y ---
-#define Y_STEP_PORT             GPIOD
-#define Y_STEP_PIN              12
+#define Y_STEP_PORT             GPIOE
+#define Y_STEP_PIN              5
 #define Y_DIRECTION_PORT        GPIOE
-#define Y_DIRECTION_PIN         5
+#define Y_DIRECTION_PIN         3
+#define Y_ENABLE_PORT           GPIOC
+#define Y_ENABLE_PIN            13
 
 // --- Trục Z ---
-#define Z_STEP_PORT             GPIOD
-#define Z_STEP_PIN              13
-#define Z_DIRECTION_PORT        GPIOE
-#define Z_DIRECTION_PIN         6
+#define Z_STEP_PORT             GPIOC
+#define Z_STEP_PIN              1
+#define Z_DIRECTION_PORT        GPIOC
+#define Z_DIRECTION_PIN         0
+#define Z_ENABLE_PORT           GPIOC
+#define Z_ENABLE_PIN            2
 
 // --- (Tùy chọn) Trục thứ 4 (Trục A / M3) ---
 #if N_ABC_MOTORS >= 1
@@ -61,22 +67,20 @@
 #define M3_STEP_PIN             14
 #define M3_DIRECTION_PORT       GPIOE
 #define M3_DIRECTION_PIN        0
+#define M3_ENABLE_PORT          GPIOD
+#define M3_ENABLE_PIN           7
 #endif
-
-// --- Chân Enable chung cho Driver động cơ (Bật/Tắt nguồn cuộn dây động cơ) ---
-#define STEPPERS_ENABLE_PORT    GPIOD
-#define STEPPERS_ENABLE_PIN     4
 
 // =============================================================================
 // 4. CÔNG TẮC HÀNH TRÌNH CÁC TRỤC (LIMIT SWITCHES)
 // =============================================================================
 #define LIMIT_PORT              GPIOA
 #define X_LIMIT_PORT            GPIOA
-#define X_LIMIT_PIN             4
+#define X_LIMIT_PIN             0
 #define Y_LIMIT_PORT            GPIOA
-#define Y_LIMIT_PIN             5
+#define Y_LIMIT_PIN             1
 #define Z_LIMIT_PORT            GPIOA
-#define Z_LIMIT_PIN             6
+#define Z_LIMIT_PIN             2
 
 // =============================================================================
 // 5. ĐIỀU KHIỂN TRỤC CHÍNH (SPINDLE)
@@ -139,8 +143,8 @@
 #define AUXINPUT1_PIN           7
 
 // AUXINPUT2: Nút dừng khẩn cấp / Reset (E-Stop)
-#define AUXINPUT2_PORT          GPIOC
-#define AUXINPUT2_PIN           0
+#define AUXINPUT2_PORT          GPIOE
+#define AUXINPUT2_PIN           11
 
 // AUXINPUT3: Nút tạm dừng gia công (Feed Hold)
 #define AUXINPUT3_PORT          GPIOB
