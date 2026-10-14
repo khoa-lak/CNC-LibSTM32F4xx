@@ -217,5 +217,10 @@
 #define ATC_AIR_BLAST_PORT      GPIOB   // Van khí thổi sạch côn dao Spindle
 #define ATC_AIR_BLAST_PIN       11
 
+// =============================================================================
+// 9. CỔNG GIAO TIẾP VỚI MÀN HÌNH OFFLINE / MKS TFT (USART1: PA9 - TX, PA10 - RX)
+// =============================================================================
+#define SERIAL_PORT             1       // GPIOA: TX = PA9, RX = PA10
+
 #endif // _MY_MACHINE_MAP_H_
 
