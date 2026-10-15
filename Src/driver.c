@@ -49,6 +49,7 @@
 
 #if USB_SERIAL_CDC
 #include "usb_serial.h"
+#include "dual_stream.h"
 #endif
 
 #if EEPROM_ENABLE
@@ -2890,7 +2891,13 @@ bool driver_init (void)
 
     grbl.on_report_options = onReportOptions;
 
+  #if defined(SERIAL_PORT) && SERIAL_PORT != 0
+    const io_stream_t *usb_stream = usbInit();
+    const io_stream_t *uart_stream = stream_open_instance(SERIAL_STREAM, BAUD_RATE, NULL, "MKS TFT");
+    stream_connect(dual_stream_init(usb_stream, uart_stream));
+  #else
     stream_connect(usbInit());
+  #endif
     system_register_commands(&boot_commands);
 
   #if COPROC_PASSTHRU

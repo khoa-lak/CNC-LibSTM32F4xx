@@ -749,9 +749,13 @@ static const io_stream_t *serialInit (uint32_t baud_rate)
             .Mode      = GPIO_MODE_AF_PP,
             .Pull      = GPIO_NOPULL,
             .Speed     = GPIO_SPEED_FREQ_VERY_HIGH,
-            .Pin       = (1 << UART0_RX_PIN)|(1 << UART0_TX_PIN),
+            .Pin       = (1 << UART0_TX_PIN),
             .Alternate = UART0_AF
         };
+        HAL_GPIO_Init(UART0_PORT, &GPIO_InitStructure);
+
+        GPIO_InitStructure.Pull = GPIO_PULLUP;
+        GPIO_InitStructure.Pin  = (1 << UART0_RX_PIN);
         HAL_GPIO_Init(UART0_PORT, &GPIO_InitStructure);
 
 #else
@@ -765,7 +769,8 @@ static const io_stream_t *serialInit (uint32_t baud_rate)
         };
         HAL_GPIO_Init(UART0_TX_PORT, &GPIO_InitStructure);
 
-        GPIO_InitStructure.Pin = (1 << UART0_RX_PIN),
+        GPIO_InitStructure.Pull = GPIO_PULLUP;
+        GPIO_InitStructure.Pin = (1 << UART0_RX_PIN);
         HAL_GPIO_Init(UART0_RX_PORT, &GPIO_InitStructure);
 
 #endif
@@ -783,7 +788,8 @@ static const io_stream_t *serialInit (uint32_t baud_rate)
 
 void UART0_IRQHandler (void)
 {
-    if(UART0->SR & USART_SR_RXNE) {
+    uint32_t sr = UART0->SR;
+    if(sr & (USART_SR_RXNE | USART_SR_ORE)) {
         uint32_t data = UART0->DR;
         if(!enqueue_realtime_command((uint8_t)data)) {          // Check and strip realtime commands...
             uint16_t next_head = BUFNEXT(rxbuf.head, rxbuf);    // Get and increment buffer pointer
